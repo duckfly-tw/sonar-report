@@ -492,10 +492,46 @@ const generateReport = async (options) => {
         page++;
         const json = JSON.parse(response.body);
         nbResults = json.issues.length;
+
+        //insert code block -- start
+        for (let i of json.issues){
+          let r = await got(
+            `${sonarBaseURL}/api/sources/issue_snippets?issueKey=${i.key}`,
+            {
+              agent,
+              headers,
+            }
+          );
+          let snippets = JSON.parse(r.body);
+
+          let code_block = '';
+          for (let s in snippets) {
+            code_block += `<div style="color:#3b53ba">${s}</div><table class="source-table expand-up expand-down"><tbody>`;
+            let now_line = snippets[s].sources[0].line-1;
+
+            for( let j of snippets[s].sources ){
+              if(j.line > now_line+1){
+                code_block += `</tbody></table><table class="source-table expand-up expand-down"><tbody>`;
+              }
+              // let hint_style = ('lineHits' in j)?`source-line-uncovered`:'';
+              let hint_style = '';
+              let pre_style = (j.line === i.line)?'style="background:#ffc1c1"':'';
+              code_block += `<tr class="source-line" data-line-number="${j.line}"><td class="source-meta source-line-number" data-line-number="${j.line}">${j.line}</td><td class="source-meta source-line-coverage ${hint_style}" data-line-number="${j.line}"></td><td class="source-line-code code" data-line-number="${j.line}"><div class="source-line-code-inner"><pre ${pre_style}>${j.code}</pre></div></td></tr>`;
+              now_line = j.line;
+            }
+
+            code_block += `</tbody></table>`;
+          }
+
+          i.code_block = code_block;
+        }
+        //insert code block -- end
+
         data.issues = data.issues.concat(
           json.issues.map((issue) => {
             const rule = data.rules.get(issue.rule);
             const message = rule ? rule.name : "/";
+
             return {
               rule: issue.rule,
               // For security hotspots, the vulnerabilities show without a severity before they are confirmed
@@ -512,6 +548,7 @@ const generateReport = async (options) => {
               description: message,
               message: issue.message,
               key: issue.key,
+              code: issue.code_block
             };
           })
         );
@@ -559,6 +596,55 @@ const generateReport = async (options) => {
             }
           );
           const hotspot = JSON.parse(response.body);
+
+          //insert code block -- start
+          let start_line = hotspot.textRange.startLine;
+          let end_line = hotspot.textRange.endLine;
+
+          if('flows' in hotspot && hotspot.flows.length > 0) {
+            for (let location in hotspot.flows[0].locations) {
+              if(location.component !== hotspot.component.key) continue;
+              
+              if(location.textRange.startLine < start_line){
+                start_line = location.textRange.startLine;
+              }
+              
+              if(location.textRange.endLine > end_line) {
+                end_line = location.textRange.endLine;
+              }
+            }
+          }
+
+          start_line = (start_line - 10 >= 1)?(start_line - 10):1;
+          end_line = end_line + 10;
+          // console.log(hotspot.component);
+          let r = await got(
+            `${sonarBaseURL}/api/sources/lines?key=${hotspot.component.key}&from=${start_line}&to=${end_line}`,
+            {
+              agent,
+              headers,
+            }
+          );
+          let snippet = JSON.parse(r.body);
+
+          let code_block = '';
+          code_block += `<div style="color:#3b53ba">${hotspot.component.key}</div><table class="source-table expand-up expand-down"><tbody>`;
+          let now_line = snippet.sources[0].line-1;
+
+          for( let j of snippet.sources ){
+            if(j.line > now_line+1){
+              code_block += `</tbody></table><table class="source-table expand-up expand-down"><tbody>`;
+            }
+            // let hint_style = ('lineHits' in j)?`source-line-uncovered`:'';
+            let hint_style = '';
+            let pre_style = (j.line === hotspot.line)?'style="background:#ffc1c1"':'';
+            code_block += `<tr class="source-line" data-line-number="${j.line}"><td class="source-meta source-line-number" data-line-number="${j.line}">${j.line}</td><td class="source-meta source-line-coverage ${hint_style}" data-line-number="${j.line}"></td><td class="source-line-code code" data-line-number="${j.line}"><div class="source-line-code-inner"><pre ${pre_style}>${j.code}</pre></div></td></tr>`;
+            now_line = j.line;
+          }
+
+          code_block += `</tbody></table>`;
+          //insert code block -- end
+
           hSeverity = hotspotSeverities[hotspot.rule.vulnerabilityProbability];
           if (hSeverity === undefined) {
             hSeverity = "MAJOR";
@@ -578,6 +664,7 @@ const generateReport = async (options) => {
             description: hotspot.rule ? hotspot.rule.name : "/",
             message: hotspot.message,
             key: hotspot.key,
+            code: code_block
           });
         } catch (error) {
           logError("getting hotspots details", error);
