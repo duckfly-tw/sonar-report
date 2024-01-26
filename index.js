@@ -632,10 +632,10 @@ const generateReport = async (options) => {
               issue_lines.push([location.textRange.startLine, location.textRange.endLine]);
             }
           }
-          console.log(issue_lines);
+
           start_line = (start_line - 10 >= 1)?(start_line - 10):1;
           end_line = end_line + 10;
-          // console.log(hotspot.component);
+          
           let r = await got(
             `${sonarBaseURL}/api/sources/lines?key=${hotspot.component.key}&from=${start_line}&to=${end_line}`,
             {

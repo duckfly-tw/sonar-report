@@ -174,8 +174,10 @@
       <tbody>
         <% for(var i=0; i < issues.length; i++) { %>
         <tr>
-          <td><a href="<%= sonarBaseURL %>/coding_rules#rule_key=<%= issues[i].rule %>">
-              <%= issues[i].rule %>
+          <td>
+            <!-- <a href="<%= sonarBaseURL %>/coding_rules#rule_key=<%= issues[i].rule %>"> -->
+            <a href="https://next.sonarqube.com/sonarqube/coding_rules#rule_key=<%= issues[i].rule %>">
+            <%= issues[i].rule %>
             </a></td>
           <td>
             <%= issues[i].severity %>
@@ -197,7 +199,7 @@
           </td>
           <td><%- issues[i].link(issues[i].status) %></td>
         </tr>
-        <tr>
+        <tr style="break-after: page">
           <td colspan="8">
             <%- issues[i].code %>
           </td>
