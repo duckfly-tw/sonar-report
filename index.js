@@ -503,6 +503,14 @@ const generateReport = async (options) => {
             }
           );
           let snippets = JSON.parse(r.body);
+          let issue_lines = [[i.textRange.startLine, i.textRange.endLine]];
+
+          if('flows' in i && i.flows.length > 0) {
+            for (let location of i.flows[0].locations) {
+              if(location.component !== i.component) continue;
+              issue_lines.push([location.textRange.startLine, location.textRange.endLine]);
+            }
+          }
 
           let code_block = '';
           for (let s in snippets) {
@@ -515,7 +523,14 @@ const generateReport = async (options) => {
               }
               // let hint_style = ('lineHits' in j)?`source-line-uncovered`:'';
               let hint_style = '';
-              let pre_style = (j.line === i.line)?'style="background:#ffc1c1"':'';
+              // let pre_style = (j.line === i.line)?'style="background:#ffc1c1;-webkit-print-color-adjust:exact;"':'';
+              let pre_style = '';
+              for (let range of issue_lines){
+                if(j.line >= range[0] && j.line <= range[1]){
+                  pre_style = 'style="background:#ffc1c1;-webkit-print-color-adjust:exact;"';
+                  break;
+                }
+              }
               code_block += `<tr class="source-line" data-line-number="${j.line}"><td class="source-meta source-line-number" data-line-number="${j.line}">${j.line}</td><td class="source-meta source-line-coverage ${hint_style}" data-line-number="${j.line}"></td><td class="source-line-code code" data-line-number="${j.line}"><div class="source-line-code-inner"><pre ${pre_style}>${j.code}</pre></div></td></tr>`;
               now_line = j.line;
             }
@@ -600,9 +615,10 @@ const generateReport = async (options) => {
           //insert code block -- start
           let start_line = hotspot.textRange.startLine;
           let end_line = hotspot.textRange.endLine;
+          let issue_lines = [[start_line, end_line]];
 
           if('flows' in hotspot && hotspot.flows.length > 0) {
-            for (let location in hotspot.flows[0].locations) {
+            for (let location of hotspot.flows[0].locations) {
               if(location.component !== hotspot.component.key) continue;
               
               if(location.textRange.startLine < start_line){
@@ -612,9 +628,11 @@ const generateReport = async (options) => {
               if(location.textRange.endLine > end_line) {
                 end_line = location.textRange.endLine;
               }
+
+              issue_lines.push([location.textRange.startLine, location.textRange.endLine]);
             }
           }
-
+          console.log(issue_lines);
           start_line = (start_line - 10 >= 1)?(start_line - 10):1;
           end_line = end_line + 10;
           // console.log(hotspot.component);
@@ -637,7 +655,14 @@ const generateReport = async (options) => {
             }
             // let hint_style = ('lineHits' in j)?`source-line-uncovered`:'';
             let hint_style = '';
-            let pre_style = (j.line === hotspot.line)?'style="background:#ffc1c1"':'';
+            // let pre_style = (j.line === hotspot.line)?'style="background:#ffc1c1;-webkit-print-color-adjust:exact;"':'';
+            let pre_style = '';
+            for (let range of issue_lines){
+              if(j.line >= range[0] && j.line <= range[1]){
+                pre_style = 'style="background:#ffc1c1;-webkit-print-color-adjust:exact;"';
+                break;
+              }
+            }
             code_block += `<tr class="source-line" data-line-number="${j.line}"><td class="source-meta source-line-number" data-line-number="${j.line}">${j.line}</td><td class="source-meta source-line-coverage ${hint_style}" data-line-number="${j.line}"></td><td class="source-line-code code" data-line-number="${j.line}"><div class="source-line-code-inner"><pre ${pre_style}>${j.code}</pre></div></td></tr>`;
             now_line = j.line;
           }
