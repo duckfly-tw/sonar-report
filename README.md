@@ -5,6 +5,7 @@
 
 ![tomcat screenshot example](screenshots/tomcat1.png "tomcat screenshot example")
 # with code block after every issue
+you can also print the html report to pdf from browser with neat format
 ![tomcat screenshot example](screenshots/tomcat2.png "tomcat screenshot example")
 
 ## Install
