@@ -405,7 +405,7 @@ const generateReport = async (options) => {
       data.qualityGateStatusPeriodDate = qualityGateStatusPeriodDate
         ? new Date(qualityGateStatusPeriodDate).toISOString().substring(0, 10)
         : `none`;
-      
+
       if (json.projectStatus.conditions) {
         for (const condition of json.projectStatus.conditions) {
           condition.metricKey = condition.metricKey.replace(/_/g, " ");
@@ -513,20 +513,19 @@ const generateReport = async (options) => {
 
           let code_block = '';
           for (let s in snippets) {
-            code_block += `<div style="color:#3b53ba">${s}</div><table class="source-table expand-up expand-down"><tbody>`;
+            code_block += `<div class="source-info">${s}</div><table class="source-table expand-up expand-down"><tbody>`;
             let now_line = snippets[s].sources[0].line-1;
 
             for( let j of snippets[s].sources ){
               if(j.line > now_line+1){
                 code_block += `</tbody></table><table class="source-table expand-up expand-down"><tbody>`;
               }
-              // let hint_style = ('lineHits' in j)?`source-line-uncovered`:'';
+
               let hint_style = '';
-              // let pre_style = (j.line === i.line)?'style="background:#ffc1c1;-webkit-print-color-adjust:exact;"':'';
               let pre_style = '';
               for (let range of issue_lines){
                 if(j.line >= range[0] && j.line <= range[1]){
-                  pre_style = 'style="background:#ffc1c1;-webkit-print-color-adjust:exact;"';
+                  pre_style = 'class="issue-line"';
                   break;
                 }
               }
@@ -645,20 +644,19 @@ const generateReport = async (options) => {
           let snippet = JSON.parse(r.body);
 
           let code_block = '';
-          code_block += `<div style="color:#3b53ba">${hotspot.component.key}</div><table class="source-table expand-up expand-down"><tbody>`;
+          code_block += `<div class="source-info">${hotspot.component.key}</div><table class="source-table expand-up expand-down"><tbody>`;
           let now_line = snippet.sources[0].line-1;
 
           for( let j of snippet.sources ){
             if(j.line > now_line+1){
               code_block += `</tbody></table><table class="source-table expand-up expand-down"><tbody>`;
             }
-            // let hint_style = ('lineHits' in j)?`source-line-uncovered`:'';
+            
             let hint_style = '';
-            // let pre_style = (j.line === hotspot.line)?'style="background:#ffc1c1;-webkit-print-color-adjust:exact;"':'';
             let pre_style = '';
             for (let range of issue_lines){
               if(j.line >= range[0] && j.line <= range[1]){
-                pre_style = 'style="background:#ffc1c1;-webkit-print-color-adjust:exact;"';
+                pre_style = 'class="issue-line"';
                 break;
               }
             }
