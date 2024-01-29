@@ -182,11 +182,12 @@ const generateReport = async (options) => {
     : () => (c) => c;
 
   let severity = new Map();
-  severity.set("MINOR", 0);
-  severity.set("MAJOR", 1);
-  severity.set("CRITICAL", 2);
-  severity.set("BLOCKER", 3);
-  let hotspotSeverities = { HIGH: "CRITICAL", MEDIUM: "MAJOR", LOW: "MINOR" };
+  severity.set("LOW", 0);
+  severity.set("MEDIUM", 1);
+  severity.set("HIGH", 2);
+  // issueSeverities is compatible for sq version <= 10.1
+  let issueSeverities =  { BLOCKER:"HIGH", CRITICAL: "HIGH", MAJOR: "MEDIUM", MINOR: "LOW", HIGH: "HIGH", MEDIUM: "MEDIUM", LOW: "LOW" };
+  let hotspotSeverities =  { HIGH: "HIGH", MEDIUM: "MEDIUM", LOW: "LOW" };
 
   let properties = [];
   try {
@@ -550,9 +551,9 @@ const generateReport = async (options) => {
               // For security hotspots, the vulnerabilities show without a severity before they are confirmed
               // In this case, get the severity from the rule
               severity:
-                typeof issue.severity !== "undefined"
-                  ? issue.severity
-                  : rule.severity,
+                (typeof issue.severity !== "undefined" && issue.severity in issueSeverities)
+                  ? issueSeverities[issue.severity]
+                  : issueSeverities[rule.severity],
               status: issue.status,
               link: issueLink(data, issue),
               // Take only filename with path, without project name
@@ -669,7 +670,7 @@ const generateReport = async (options) => {
 
           hSeverity = hotspotSeverities[hotspot.rule.vulnerabilityProbability];
           if (hSeverity === undefined) {
-            hSeverity = "MAJOR";
+            hSeverity = "MEDIUM";
             console.error(
               "Unknown hotspot severity: %s",
               hotspot.vulnerabilityProbability
@@ -700,12 +701,10 @@ const generateReport = async (options) => {
     });
 
     data.summary = {
-      blocker: data.issues.filter((issue) => issue.severity === "BLOCKER")
+      high: data.issues.filter((issue) => issue.severity === "HIGH")
         .length,
-      critical: data.issues.filter((issue) => issue.severity === "CRITICAL")
-        .length,
-      major: data.issues.filter((issue) => issue.severity === "MAJOR").length,
-      minor: data.issues.filter((issue) => issue.severity === "MINOR").length,
+      medium: data.issues.filter((issue) => issue.severity === "MEDIUM").length,
+      low: data.issues.filter((issue) => issue.severity === "LOW").length,
     };
   }
 

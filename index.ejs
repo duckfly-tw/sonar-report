@@ -118,32 +118,24 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="sevBLOCKER"></td>
-          <td>BLOCKER</td>
+          <td class="sevHIGH"></td>
+          <td>HIGH</td>
           <td>
-            <%= summary.blocker %>
+            <%= summary.high %>
           </td>
         </tr>
         <tr>
-          <td class="sevCRITICAL"></td>
-          <td>CRITICAL</td>
+          <td class="sevMEDIUM"></td>
+          <td>MEDIUM</td>
           <td>
-            <%= summary.critical %>
+            <%= summary.medium %>
           </td>
         </tr>
         <tr>
-          <td class="sevMAJOR"></td>
-          <td>MAJOR</td>
+          <td class="sevLOW"></td>
+          <td>lOW</td>
           <td>
-            <%= summary.major %>
-          </td>
-        </tr>
-        <tr>
-          <td class="sevMINOR"></td>
-          <td>MINOR</td>
-          <td>
-            <%= summary.minor %>
+            <%= summary.low %>
           </td>
         </tr>
       </tbody>
@@ -245,15 +237,14 @@
     var ctx = canvas.getContext("2d");
 
     var data = [
-      <%= summary.blocker %>,
-      <%= summary.critical %>,
-      <%= summary.major %>,
-      <%= summary.minor %>
+      <%= summary.high %>,
+      <%= summary.medium %>,
+      <%= summary.low %>
     ];
     var total = data.reduce(function(sum, n) {
       return sum + n;
     })
-    var colors = ['#2c3e50', '#d43223', '#f39c12', '#319ddb'];
+    var colors = ['#d43223', '#f39c12', '#319ddb'];
 
     for (var i = 0, lastend = 0; i < data.length; i++) {
       ctx.fillStyle = colors[i];
