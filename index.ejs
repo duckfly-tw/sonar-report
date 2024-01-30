@@ -91,7 +91,7 @@
 
         <% for (const condition of qualityGateStatus.projectStatus.conditions) { %>
         <tr>
-          <td style="background-color:<%- condition.status == 'OK' ? '#0a0' : '#d4333f' %>"></td>
+          <td style="background-color:<%- condition.status == 'OK' ? '#0a0' : '#d4333f' %>;-webkit-print-color-adjust:exact;"></td>
           <td>
             <%= condition.metricKey %>
           </td>

@@ -8,7 +8,8 @@ code,
 hr,
 pre,
 thead {
-    background: #EEE
+    background: #EEE;
+    -webkit-print-color-adjust: exact;
 }
 
 body {
@@ -149,15 +150,18 @@ canvas {
 } */
 
 .sevHIGH {
-    background-color: #d43223
+    background-color: #d43223;
+    -webkit-print-color-adjust: exact;
 }
 
 .sevMEDIUM {
-    background-color: #f39c12
+    background-color: #f39c12;
+    -webkit-print-color-adjust: exact;
 }
 
 .sevLOW {
-    background-color: #319ddb
+    background-color: #319ddb;
+    -webkit-print-color-adjust: exact;
 }
 
 .hidden {
